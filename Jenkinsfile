@@ -31,5 +31,5 @@ stages {
             sh 'kubectl apply -f deployment.yml'
         }
     }
+  }
 }
-

@@ -6,7 +6,7 @@ stages {
 
     stage('Build Docker Image') {
         steps {
-            sh 'docker build -t sgedam123/jenkins-devops:v1 .'
+            sh "docker build -t sgedam123/jenkins-devops:${BUILD_NUMBER} ."
         }
     }
 
@@ -18,10 +18,10 @@ stages {
                 passwordVariable: 'DOCKER_PASS'
             )]) {
 
-                sh '''
-                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                docker push sgedam123/jenkins-devops:v1
-                '''
+                sh """
+                echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                docker push sgedam123/jenkins-devops:${BUILD_NUMBER}
+                """
             }
         }
     }
@@ -29,6 +29,9 @@ stages {
     stage('Deploy to Kubernetes') {
         steps {
             sh 'kubectl apply -f deployment.yml'
+            sh "kubectl set image deployment/website \
+jenkins-container=sgedam123/jenkins-devops:${BUILD_NUMBER}"
+            sh "kubectl rollout status deployment/website"
         }
     }
   }
